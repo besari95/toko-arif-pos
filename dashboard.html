@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasir - Toko Arif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="bg-gradient-to-r from-violet-700 to-purple-700 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-store text-white text-xl"></i>
+                    </div>
+                    <span class="text-white font-bold text-xl">Toko Arif</span>
+                    <span class="text-white/60 text-sm hidden md:inline">| ATK & Fotokopi</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-white/80 text-sm hidden md:inline">
+                        <i class="fas fa-user mr-1"></i> Admin
+                    </span>
+                    <button onclick="logout()" class="text-white/80 hover:text-white transition">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Menu Navigasi -->
+    <div class="bg-white border-b shadow-sm sticky top-16 z-40">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-1 overflow-x-auto py-2">
+                <a href="dashboard.html"
+                    class="px-4 py-2 bg-violet-100 text-violet-700 rounded-lg font-medium flex items-center">
+                    <i class="fas fa-shopping-cart mr-2"></i> Kasir
+                </a>
+                <a href="produk.html" class="px-4 py-2 hover:bg-gray-100 rounded-lg font-medium flex items-center">
+                    <i class="fas fa-boxes mr-2"></i> Produk
+                </a>
+                <a href="laporan.html" class="px-4 py-2 hover:bg-gray-100 rounded-lg font-medium flex items-center">
+                    <i class="fas fa-chart-bar mr-2"></i> Laporan
+                </a>
+                <a href="pengaturan.html" class="px-4 py-2 hover:bg-gray-100 rounded-lg font-medium flex items-center">
+                    <i class="fas fa-cog mr-2"></i> Pengaturan
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Daftar Produk -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-box text-violet-600 mr-2"></i>Daftar Produk
+                        </h2>
+                        <div class="flex space-x-2">
+                            <input type="text" id="searchProduk" placeholder="Cari produk..."
+                                class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-violet-500 outline-none">
+                            <select id="filterKategori"
+                                class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-violet-500 outline-none">
+                                <option value="">Semua</option>
+                                <option value="ATK">ATK</option>
+                                <option value="Fotokopi">Fotokopi</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="produkList" class="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto">
+                        <!-- Produk akan di-load disini -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keranjang -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6 sticky top-32">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-shopping-cart text-violet-600 mr-2"></i>Keranjang
+                    </h2>
+                    <div id="cartItems" class="space-y-2 max-h-[300px] overflow-y-auto mb-4">
+                        <!-- Item keranjang -->
+                    </div>
+                    <div class="border-t pt-4 space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Total Item:</span>
+                            <span id="totalItems" class="font-semibold">0</span>
+                        </div>
+                        <div class="flex justify-between text-lg font-bold">
+                            <span class="text-gray-800">Total:</span>
+                            <span id="totalHarga" class="text-violet-600">Rp 0</span>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600">Bayar:</label>
+                            <input type="number" id="bayar" placeholder="Masukkan nominal"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-violet-500 outline-none">
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Kembalian:</span>
+                            <span id="kembalian" class="font-semibold text-green-600">Rp 0</span>
+                        </div>
+                        <button onclick="prosesTransaksi()"
+                            class="w-full bg-gradient-to-r from-violet-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all">
+                            <i class="fas fa-check mr-2"></i>Proses Transaksi
+                        </button>
+                        <button onclick="clearCart()"
+                            class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition">
+                            <i class="fas fa-trash mr-2"></i>Kosongkan Keranjang
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Struk -->
+    <div id="strukModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6">
+            <div id="strukContent" class="p-4 bg-gray-50 rounded-lg">
+                <!-- Struk akan di-generate disini -->
+            </div>
+            <div class="flex flex-wrap gap-2 mt-4">
+                <button onclick="cetakStruk()"
+                    class="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                    <i class="fas fa-print mr-2"></i>Cetak
+                </button>
+                <button onclick="downloadPDF()"
+                    class="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+                    <i class="fas fa-file-pdf mr-2"></i>PDF
+                </button>
+                <button onclick="downloadImage()"
+                    class="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">
+                    <i class="fas fa-image mr-2"></i>Gambar
+                </button>
+                <button onclick="tutupStruk()"
+                    class="flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">
+                    <i class="fas fa-times mr-2"></i>Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="supabase.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
