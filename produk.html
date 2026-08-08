@@ -1,19 +1,245 @@
-<!-- Tambahkan di bagian form produk -->
-<div class="mb-4">
-    <label class="form-label">Gambar Produk</label>
-    <div class="flex items-center space-x-4">
-        <button type="button" onclick="document.getElementById('fileInput').click()"
-            class="bg-violet-100 text-violet-700 px-4 py-2 rounded-lg hover:bg-violet-200 transition">
-            <i class="fas fa-upload mr-2"></i>Pilih Gambar
-        </button>
-        <button type="button" onclick="ambilFoto()"
-            class="bg-green-100 text-green-700 px-4 py-2 rounded-lg hover:bg-green-200 transition">
-            <i class="fas fa-camera mr-2"></i>Ambil Foto
-        </button>
-        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
-        <span id="namaFile" class="text-sm text-gray-500">Belum ada gambar</span>
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Produk - Toko Arif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        }
+
+        .product-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .product-card:hover {
+            border-color: #8b5cf6;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .stok-menipis {
+            animation: pulse-red 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-red {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar Sama dengan Dashboard -->
+    <nav class="gradient-bg shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-store text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-white font-bold text-xl">Toko Arif</span>
+                        <span class="text-white/60 text-sm hidden md:inline ml-2">| ATK & Fotokopi</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-white/80 text-sm hidden md:inline">
+                        <i class="fas fa-user mr-1"></i> Admin
+                    </span>
+                    <button onclick="logout()"
+                        class="text-white/80 hover:text-white transition px-3 py-1 rounded-lg hover:bg-white/10">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Menu Navigasi -->
+    <div class="bg-white border-b shadow-sm sticky top-16 z-40">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-1 overflow-x-auto py-2">
+                <a href="dashboard.html"
+                    class="px-4 py-2 hover:bg-gray-100 rounded-lg font-medium flex items-center whitespace-nowrap">
+                    <i class="fas fa-shopping-cart mr-2"></i> Kasir
+                </a>
+                <a href="produk.html"
+                    class="px-4 py-2 bg-violet-100 text-violet-700 rounded-lg font-medium flex items-center whitespace-nowrap">
+                    <i class="fas fa-boxes mr-2"></i> Produk
+                </a>
+                <a href="laporan.html"
+                    class="px-4 py-2 hover:bg-gray-100 rounded-lg font-medium flex items-center whitespace-nowrap">
+                    <i class="fas fa-chart-bar mr-2"></i> Laporan
+                </a>
+                <a href="pengaturan.html"
+                    class="px-4 py-2 hover:bg-gray-100 rounded-lg font-medium flex items-center whitespace-nowrap">
+                    <i class="fas fa-cog mr-2"></i> Pengaturan
+                </a>
+            </div>
+        </div>
     </div>
-    <div id="previewGambar" class="mt-2 hidden">
-        <img id="gambarPreview" src="" alt="Preview" class="w-32 h-32 object-cover rounded-lg border">
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        <i class="fas fa-boxes text-violet-600 mr-2"></i>Manajemen Produk
+                    </h2>
+                    <button onclick="openTambahProduk()"
+                        class="gradient-bg text-white px-6 py-2 rounded-lg hover:shadow-lg transition hover:scale-[1.02]">
+                        <i class="fas fa-plus mr-2"></i>Tambah Produk
+                    </button>
+                </div>
+
+                <!-- Filter & Search -->
+                <div class="flex flex-wrap gap-3 mb-4">
+                    <div class="relative flex-1 min-w-[200px]">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="searchProduk" placeholder="Cari produk..."
+                            class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-violet-500 outline-none">
+                    </div>
+                    <select id="filterKategori"
+                        class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-violet-500 outline-none">
+                        <option value="">Semua Kategori</option>
+                        <option value="ATK">ATK</option>
+                        <option value="Fotokopi">Fotokopi</option>
+                    </select>
+                    <button onclick="loadProduk()"
+                        class="bg-violet-100 text-violet-700 px-4 py-2 rounded-lg hover:bg-violet-200 transition">
+                        <i class="fas fa-sync"></i>
+                    </button>
+                </div>
+
+                <!-- Daftar Produk -->
+                <div id="produkList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div class="col-span-full text-center py-8">
+                        <div class="loading mx-auto"></div>
+                        <p class="text-gray-400 mt-2">Memuat produk...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+
+    <!-- Modal Tambah/Edit Produk -->
+    <div id="modalProduk" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-plus-circle text-violet-600 mr-2"></i>Tambah Produk
+                </h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="formProduk" onsubmit="saveProduk(event)" class="space-y-4">
+                <div>
+                    <label class="form-label">Nama Produk <span class="text-red-500">*</span></label>
+                    <input type="text" id="namaProduk" name="nama" required class="form-input"
+                        placeholder="Contoh: Buku Tulis 38 Lembar">
+                </div>
+                <div>
+                    <label class="form-label">Kategori <span class="text-red-500">*</span></label>
+                    <select id="kategoriProduk" name="kategori" required class="form-input">
+                        <option value="ATK">ATK</option>
+                        <option value="Fotokopi">Fotokopi</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="form-label">Harga Jual <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
+                            <input type="number" id="hargaJual" name="harga_jual" required class="form-input pl-10"
+                                placeholder="0">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Harga Modal <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
+                            <input type="number" id="hargaModal" name="harga_modal" required class="form-input pl-10"
+                                placeholder="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="form-label">Stok <span class="text-red-500">*</span></label>
+                        <input type="number" id="stokProduk" name="stok" required class="form-input" placeholder="0">
+                    </div>
+                    <div>
+                        <label class="form-label">Satuan</label>
+                        <input type="text" id="satuanProduk" name="satuan" value="pcs" class="form-input">
+                    </div>
+                </div>
+                <!-- Upload Gambar -->
+                <div class="mb-4">
+                    <label class="form-label">Gambar Produk</label>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button type="button" onclick="document.getElementById('fileInput').click()"
+                            class="bg-violet-100 text-violet-700 px-4 py-2 rounded-lg hover:bg-violet-200 transition text-sm flex items-center">
+                            <i class="fas fa-upload mr-2"></i>Pilih Gambar
+                        </button>
+                        <button type="button" onclick="ambilFoto()"
+                            class="bg-green-100 text-green-700 px-4 py-2 rounded-lg hover:bg-green-200 transition text-sm flex items-center">
+                            <i class="fas fa-camera mr-2"></i>Ambil Foto
+                        </button>
+                        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                        <span id="namaFile" class="text-sm text-gray-500">Belum ada gambar</span>
+                    </div>
+                
+                    <!-- Preview Gambar -->
+                    <div id="previewGambar" class="mt-3 hidden">
+                        <div class="relative inline-block">
+                            <img id="gambarPreview" src="" alt="Preview"
+                                class="w-32 h-32 object-cover rounded-lg border-2 border-violet-200">
+                            <button type="button" onclick="hapusGambar()"
+                                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Klik icon × untuk menghapus gambar</p>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-4 border-t">
+                    <button type="submit"
+                        class="flex-1 gradient-bg text-white py-2 rounded-lg font-semibold hover:shadow-lg transition hover:scale-[1.02]">
+                        <i class="fas fa-save mr-2"></i>Simpan
+                    </button>
+                    <button type="button" onclick="closeModal()"
+                        class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -471,12 +471,24 @@ function tutupStruk() {
 }
 
 // ============ UPLOAD GAMBAR ============
+
 function handleFileSelect(event) {
     const file = event.target.files[0];
     if (file) {
+        // Validasi tipe file
+        if (!file.type.startsWith('image/')) {
+            alert('File harus berupa gambar!');
+            return;
+        }
+        
+        // Validasi ukuran (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Ukuran gambar maksimal 2MB!');
+            return;
+        }
+        
         selectedFile = file;
-        const namaFileEl = document.getElementById('namaFile');
-        if (namaFileEl) namaFileEl.textContent = file.name;
+        document.getElementById('namaFile').textContent = file.name;
         
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -492,58 +504,55 @@ function handleFileSelect(event) {
 }
 
 function ambilFoto() {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.capture = 'environment';
-        input.onchange = function(e) {
-            if (e.target.files[0]) {
-                selectedFile = e.target.files[0];
-                const namaFileEl = document.getElementById('namaFile');
-                if (namaFileEl) namaFileEl.textContent = selectedFile.name;
-                
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const preview = document.getElementById('gambarPreview');
-                    const previewContainer = document.getElementById('previewGambar');
-                    if (preview) {
-                        preview.src = event.target.result;
-                        if (previewContainer) previewContainer.classList.remove('hidden');
-                    }
-                };
-                reader.readAsDataURL(selectedFile);
+    // Cek apakah perangkat mendukung kamera
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Perangkat tidak mendukung kamera! Gunakan fitur Pilih Gambar.');
+        return;
+    }
+    
+    // Cek apakah di mobile (ada touch support)
+    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    
+    if (isMobile) {
+        input.capture = 'environment'; // Kamera belakang untuk mobile
+    }
+    
+    input.onchange = function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            
+            // Validasi tipe file
+            if (!file.type.startsWith('image/')) {
+                alert('File harus berupa gambar!');
+                return;
             }
-        };
-        input.click();
-    } else {
-        alert('Perangkat tidak mendukung kamera!');
-    }
-}
-
-async function uploadGambarProduk(file, namaProduk) {
-    try {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${namaProduk.replace(/\s/g, '-')}.${fileExt}`;
-        const filePath = `produk/${fileName}`;
-        
-        const { data, error } = await supabaseClient
-            .storage
-            .from('produk-images')
-            .upload(filePath, file);
-        
-        if (error) throw error;
-        
-        const { data: urlData } = await supabaseClient
-            .storage
-            .from('produk-images')
-            .getPublicUrl(filePath);
-        
-        return urlData.publicUrl;
-    } catch (error) {
-        console.error('Upload error:', error);
-        throw error;
-    }
+            
+            // Validasi ukuran (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Ukuran gambar maksimal 2MB!');
+                return;
+            }
+            
+            selectedFile = file;
+            document.getElementById('namaFile').textContent = file.name;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const preview = document.getElementById('gambarPreview');
+                const previewContainer = document.getElementById('previewGambar');
+                if (preview) {
+                    preview.src = event.target.result;
+                    if (previewContainer) previewContainer.classList.remove('hidden');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    input.click();
 }
 
 // ============ CRUD PRODUK ============
@@ -925,3 +934,73 @@ window.loadPengeluaran = loadPengeluaran;
 window.tambahPengeluaran = tambahPengeluaran;
 window.hapusPengeluaran = hapusPengeluaran;
 window.hitungLabaRugi = hitungLabaRugi;
+
+// ============ BUKA MODAL TAMBAH PRODUK ============
+function openTambahProduk() {
+    editProdukId = null;
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle text-violet-600 mr-2"></i>Tambah Produk';
+    document.getElementById('formProduk').reset();
+    
+    // Reset gambar
+    selectedFile = null;
+    document.getElementById('previewGambar').classList.add('hidden');
+    document.getElementById('gambarPreview').src = '';
+    document.getElementById('namaFile').textContent = 'Belum ada gambar';
+    document.getElementById('fileInput').value = '';
+    
+    document.getElementById('modalProduk').classList.remove('hidden');
+}
+
+// ============ EDIT PRODUK ============
+async function editProduk(id) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('produk')
+            .select('*')
+            .eq('id', id)
+            .single();
+        
+        if (error) throw error;
+        
+        editProdukId = id;
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit text-violet-600 mr-2"></i>Edit Produk';
+        document.getElementById('namaProduk').value = data.nama;
+        document.getElementById('kategoriProduk').value = data.kategori;
+        document.getElementById('hargaJual').value = data.harga_jual;
+        document.getElementById('hargaModal').value = data.harga_modal;
+        document.getElementById('stokProduk').value = data.stok;
+        document.getElementById('satuanProduk').value = data.satuan || 'pcs';
+        
+        // Reset gambar dulu
+        selectedFile = null;
+        document.getElementById('fileInput').value = '';
+        
+        // Jika ada gambar, tampilkan preview
+        if (data.gambar) {
+            document.getElementById('gambarPreview').src = data.gambar;
+            document.getElementById('previewGambar').classList.remove('hidden');
+            document.getElementById('namaFile').textContent = 'Gambar sudah ada';
+        } else {
+            document.getElementById('previewGambar').classList.add('hidden');
+            document.getElementById('gambarPreview').src = '';
+            document.getElementById('namaFile').textContent = 'Belum ada gambar';
+        }
+        
+        document.getElementById('modalProduk').classList.remove('hidden');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Gagal memuat data produk');
+    }
+}
+
+// ============ HAPUS GAMBAR ============
+function hapusGambar() {
+    if (!confirm('Hapus gambar yang dipilih?')) return;
+    
+    selectedFile = null;
+    document.getElementById('previewGambar').classList.add('hidden');
+    document.getElementById('gambarPreview').src = '';
+    document.getElementById('namaFile').textContent = 'Belum ada gambar';
+    document.getElementById('fileInput').value = '';
+}
