@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan - Toko Arif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="bg-gradient-to-r from-violet-700 to-purple-700 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-store text-white text-2xl"></i>
+                    <span class="text-white font-bold text-xl">Toko Arif</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-white/80 text-sm hidden md:inline">
+                        <i class="fas fa-user mr-1"></i> Admin
+                    </span>
+                    <button onclick="logout()" class="text-white/80 hover:text-white transition">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Menu Navigasi -->
+    <div class="bg-white border-b shadow-sm sticky top-16 z-40">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-1 overflow-x-auto py-2">
+                <a href="dashboard.html" class="px-4 py-2 hover:bg-gray-100 rounded-lg font-medium flex items-center">
+                    <i class="fas fa-shopping-cart mr-2"></i> Kasir
+                </a>
+                <a href="produk.html" class="px-4 py-2 hover:bg-gray-100 rounded-lg font-medium flex items-center">
+                    <i class="fas fa-boxes mr-2"></i> Produk
+                </a>
+                <a href="laporan.html" class="px-4 py-2 hover:bg-gray-100 rounded-lg font-medium flex items-center">
+                    <i class="fas fa-chart-bar mr-2"></i> Laporan
+                </a>
+                <a href="pengaturan.html"
+                    class="px-4 py-2 bg-violet-100 text-violet-700 rounded-lg font-medium flex items-center">
+                    <i class="fas fa-cog mr-2"></i> Pengaturan
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-cog text-violet-600 mr-2"></i>Pengaturan Toko
+            </h2>
+
+            <!-- Tab Navigation -->
+            <div class="flex flex-wrap gap-2 mb-6 border-b pb-2">
+                <button onclick="showTab('toko')"
+                    class="tab-btn px-4 py-2 rounded-lg font-medium bg-violet-600 text-white" data-tab="toko">
+                    <i class="fas fa-store mr-2"></i>Data Toko
+                </button>
+                <button onclick="showTab('password')" class="tab-btn px-4 py-2 rounded-lg font-medium hover:bg-gray-100"
+                    data-tab="password">
+                    <i class="fas fa-key mr-2"></i>Ganti Password
+                </button>
+                <button onclick="showTab('backup')" class="tab-btn px-4 py-2 rounded-lg font-medium hover:bg-gray-100"
+                    data-tab="backup">
+                    <i class="fas fa-database mr-2"></i>Backup Data
+                </button>
+            </div>
+
+            <!-- Tab 1: Data Toko -->
+            <div id="tab-toko" class="tab-content bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-edit text-violet-600 mr-2"></i>Edit Data Toko
+                </h3>
+                <form id="formToko" onsubmit="saveToko(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Nama Toko</label>
+                            <input type="text" id="nama_toko" name="nama_toko" class="form-input" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Nama Pemilik</label>
+                            <input type="text" id="pemilik" name="pemilik" class="form-input" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Alamat</label>
+                            <input type="text" id="alamat" name="alamat" class="form-input" required>
+                        </div>
+                        <div>
+                            <label class="form-label">No. WhatsApp</label>
+                            <input type="text" id="wa" name="wa" class="form-input" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Email</label>
+                            <input type="email" id="email" name="email" class="form-input" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Bank</label>
+                            <input type="text" id="bank" name="bank" class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">No. Rekening</label>
+                            <input type="text" id="rekening" name="rekening" class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">Atas Nama</label>
+                            <input type="text" id="atas_nama" name="atas_nama" class="form-input">
+                        </div>
+                    </div>
+                    <button type="submit"
+                        class="bg-violet-600 text-white px-6 py-2 rounded-lg hover:bg-violet-700 transition">
+                        <i class="fas fa-save mr-2"></i>Simpan Perubahan
+                    </button>
+                </form>
+            </div>
+
+            <!-- Tab 2: Ganti Password -->
+            <div id="tab-password" class="tab-content hidden bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-key text-violet-600 mr-2"></i>Ganti Password
+                </h3>
+                <form id="formPassword" onsubmit="changePassword(event)" class="space-y-4 max-w-md">
+                    <div>
+                        <label class="form-label">Username</label>
+                        <input type="text" id="username" value="admin" class="form-input bg-gray-100" readonly>
+                    </div>
+                    <div>
+                        <label class="form-label">Password Lama</label>
+                        <input type="password" id="oldPassword" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Password Baru</label>
+                        <input type="password" id="newPassword" class="form-input" required minlength="6">
+                    </div>
+                    <div>
+                        <label class="form-label">Konfirmasi Password Baru</label>
+                        <input type="password" id="confirmPassword" class="form-input" required>
+                    </div>
+                    <button type="submit"
+                        class="bg-violet-600 text-white px-6 py-2 rounded-lg hover:bg-violet-700 transition">
+                        <i class="fas fa-save mr-2"></i>Ganti Password
+                    </button>
+                </form>
+            </div>
+
+            <!-- Tab 3: Backup Data -->
+            <div id="tab-backup" class="tab-content hidden bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-database text-violet-600 mr-2"></i>Backup & Restore Data
+                </h3>
+                <div class="space-y-4">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-blue-800 text-sm">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Backup akan mendownload semua data dalam format JSON.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="backupData()"
+                            class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center">
+                            <i class="fas fa-download mr-2"></i>Download Backup
+                        </button>
+                        <button onclick="document.getElementById('restoreFile').click()"
+                            class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition flex items-center justify-center">
+                            <i class="fas fa-upload mr-2"></i>Restore Data
+                        </button>
+                        <input type="file" id="restoreFile" accept=".json" class="hidden" onchange="restoreData(event)">
+                    </div>
+
+                    <div class="border-t pt-4 mt-4">
+                        <h4 class="font-semibold text-gray-700 mb-2">Data yang akan di-backup:</h4>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li>✅ <i class="fas fa-box text-violet-500 mr-2"></i>Produk</li>
+                            <li>✅ <i class="fas fa-receipt text-violet-500 mr-2"></i>Transaksi</li>
+                            <li>✅ <i class="fas fa-money-bill text-violet-500 mr-2"></i>Pengeluaran</li>
+                            <li>✅ <i class="fas fa-store text-violet-500 mr-2"></i>Data Toko</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="hidden fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50"></div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // ============ TAB NAVIGATION ============
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-violet-600', 'text-white');
+                el.classList.add('hover:bg-gray-100');
+            });
+
+            // Show selected tab
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            const btn = document.querySelector(`[data-tab="${tabName}"]`);
+            btn.classList.add('bg-violet-600', 'text-white');
+            btn.classList.remove('hover:bg-gray-100');
+        }
+
+        // ============ LOAD DATA TOKO ============
+        async function loadTokoData() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('pengaturan')
+                    .select('*');
+
+                if (error) throw error;
+
+                const toko = {};
+                data.forEach(item => {
+                    toko[item.key] = item.value;
+                });
+
+                // Fill form
+                document.getElementById('nama_toko').value = toko.nama_toko || '';
+                document.getElementById('pemilik').value = toko.pemilik || '';
+                document.getElementById('alamat').value = toko.alamat || '';
+                document.getElementById('wa').value = toko.wa || '';
+                document.getElementById('email').value = toko.email || '';
+                document.getElementById('bank').value = toko.bank || '';
+                document.getElementById('rekening').value = toko.rekening || '';
+                document.getElementById('atas_nama').value = toko.atas_nama || '';
+
+            } catch (error) {
+                console.error('Error loading toko:', error);
+                showNotification('Gagal memuat data toko', 'error');
+            }
+        }
+
+        // ============ SAVE DATA TOKO ============
+        async function saveToko(event) {
+            event.preventDefault();
+
+            const form = document.getElementById('formToko');
+            const formData = new FormData(form);
+            const data = {};
+
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            try {
+                // Update each setting
+                for (const [key, value] of Object.entries(data)) {
+                    const { error } = await supabaseClient
+                        .from('pengaturan')
+                        .upsert({ key, value });
+
+                    if (error) throw error;
+                }
+
+                showNotification('Data toko berhasil disimpan!', 'success');
+
+            } catch (error) {
+                console.error('Error saving:', error);
+                showNotification('Gagal menyimpan data: ' + error.message, 'error');
+            }
+        }
+
+        // ============ CHANGE PASSWORD ============
+        async function changePassword(event) {
+            event.preventDefault();
+
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showNotification('Password baru tidak cocok!', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showNotification('Password minimal 6 karakter!', 'error');
+                return;
+            }
+
+            try {
+                // Check old password
+                const { data, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('username', 'admin')
+                    .eq('password', oldPassword);
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    showNotification('Password lama salah!', 'error');
+                    return;
+                }
+
+                // Update password
+                const { error: updateError } = await supabaseClient
+                    .from('users')
+                    .update({ password: newPassword })
+                    .eq('username', 'admin');
+
+                if (updateError) throw updateError;
+
+                showNotification('Password berhasil diganti!', 'success');
+                document.getElementById('formPassword').reset();
+
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Gagal mengganti password: ' + error.message, 'error');
+            }
+        }
+
+        // ============ BACKUP DATA ============
+        async function backupData() {
+            try {
+                showNotification('Mengambil data...', 'info');
+
+                // Get all data
+                const tables = ['produk', 'transaksi', 'detail_transaksi', 'pengeluaran', 'pengaturan'];
+                const backup = {};
+
+                for (const table of tables) {
+                    const { data, error } = await supabaseClient
+                        .from(table)
+                        .select('*');
+
+                    if (error) throw error;
+                    backup[table] = data;
+                }
+
+                // Create download
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup-toko-arif-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                showNotification('Backup berhasil diunduh!', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Gagal backup: ' + error.message, 'error');
+            }
+        }
+
+        // ============ RESTORE DATA ============
+        async function restoreData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+
+                if (!confirm(`Yakin ingin merestorasi data dari ${file.name}?`)) return;
+
+                showNotification('Merestorasi data...', 'info');
+
+                const tables = ['produk', 'transaksi', 'detail_transaksi', 'pengeluaran', 'pengaturan'];
+
+                for (const table of tables) {
+                    if (data[table]) {
+                        // Clear existing data
+                        await supabaseClient.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+                        // Insert new data
+                        if (data[table].length > 0) {
+                            const { error } = await supabaseClient
+                                .from(table)
+                                .insert(data[table]);
+
+                            if (error) throw error;
+                        }
+                    }
+                }
+
+                showNotification('Restore data berhasil!', 'success');
+                loadTokoData();
+
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Gagal restore: ' + error.message, 'error');
+            }
+
+            // Reset input
+            event.target.value = '';
+        }
+
+        // ============ NOTIFICATION ============
+        function showNotification(message, type = 'info') {
+            const el = document.getElementById('notification');
+            el.textContent = message;
+            el.className = 'fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50';
+
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                info: 'bg-blue-500 text-white'
+            };
+
+            el.classList.add(colors[type] || colors.info);
+            el.classList.remove('hidden');
+
+            setTimeout(() => {
+                el.classList.add('hidden');
+            }, 3000);
+        }
+
+        // ============ LOGOUT ============
+        function logout() {
+            if (confirm('Yakin ingin logout?')) {
+                localStorage.removeItem('isLoggedIn');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // ============ INIT ============
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check login
+            if (!localStorage.getItem('isLoggedIn')) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            loadTokoData();
+        });
+    </script>
+</body>
+
+</html>
