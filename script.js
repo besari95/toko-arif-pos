@@ -444,3 +444,284 @@ async function getTokoInfo() {
         return {};
     }
 }
+
+// ============ UPLOAD GAMBAR ============
+
+let selectedFile = null;
+
+// Handle file select dari galeri
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+        selectedFile = file;
+        document.getElementById('namaFile').textContent = file.name;
+        
+        // Preview gambar
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('gambarPreview');
+            preview.src = e.target.result;
+            document.getElementById('previewGambar').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Ambil foto dari kamera
+function ambilFoto() {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // Buka kamera
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'environment';
+        input.onchange = function(e) {
+            if (e.target.files[0]) {
+                selectedFile = e.target.files[0];
+                document.getElementById('namaFile').textContent = selectedFile.name;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const preview = document.getElementById('gambarPreview');
+                    preview.src = event.target.result;
+                    document.getElementById('previewGambar').classList.remove('hidden');
+                };
+                reader.readAsDataURL(selectedFile);
+            }
+        };
+        input.click();
+    } else {
+        alert('Perangkat tidak mendukung kamera!');
+    }
+}
+
+// Upload gambar ke Supabase Storage
+async function uploadGambarProduk(file, namaProduk) {
+    try {
+        // Buat nama file unik
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${namaProduk.replace(/\s/g, '-')}.${fileExt}`;
+        const filePath = `produk/${fileName}`;
+        
+        // Upload ke Supabase Storage
+        const { data, error } = await supabaseClient
+            .storage
+            .from('produk-images')
+            .upload(filePath, file);
+        
+        if (error) throw error;
+        
+        // Dapatkan URL publik
+        const { data: urlData } = await supabaseClient
+            .storage
+            .from('produk-images')
+            .getPublicUrl(filePath);
+        
+        return urlData.publicUrl;
+    } catch (error) {
+        console.error('Upload error:', error);
+        throw error;
+    }
+}
+
+// Update fungsi tambah/edit produk dengan upload gambar
+async function tambahProduk(event) {
+    event.preventDefault();
+    
+    const form = document.getElementById('formProduk');
+    const formData = new FormData(form);
+    
+    try {
+        let gambarUrl = null;
+        
+        // Upload gambar jika ada
+        if (selectedFile) {
+            gambarUrl = await uploadGambarProduk(selectedFile, formData.get('nama'));
+        }
+        
+        const data = {
+            nama: formData.get('nama'),
+            kategori: formData.get('kategori'),
+            harga_jual: parseFloat(formData.get('harga_jual')),
+            harga_modal: parseFloat(formData.get('harga_modal')),
+            stok: parseInt(formData.get('stok')),
+            satuan: formData.get('satuan'),
+            gambar: gambarUrl
+        };
+        
+        const { error } = await supabaseClient
+            .from('produk')
+            .insert([data]);
+        
+        if (error) throw error;
+        
+        alert('Produk berhasil ditambahkan!');
+        form.reset();
+        selectedFile = null;
+        document.getElementById('previewGambar').classList.add('hidden');
+        document.getElementById('namaFile').textContent = 'Belum ada gambar';
+        loadProduk();
+        closeModal('modalTambahProduk');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Gagal menambahkan produk: ' + error.message);
+    }
+}
+
+// ============ PENGELUARAN ============
+
+async function loadPengeluaran() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('pengeluaran')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        renderPengeluaran(data);
+        return data;
+    } catch (error) {
+        console.error('Error:', error);
+        return [];
+    }
+}
+
+function renderPengeluaran(data) {
+    const container = document.getElementById('daftarPengeluaran');
+    if (!data || data.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-8 text-gray-400">
+                <i class="fas fa-inbox text-4xl mb-2"></i>
+                <p>Belum ada pengeluaran</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = data.map(item => `
+        <div class="flex justify-between items-center bg-white p-3 rounded-lg border hover:shadow-md transition">
+            <div>
+                <p class="font-medium">${item.deskripsi}</p>
+                <p class="text-sm text-gray-500">
+                    ${item.kategori} • ${new Date(item.created_at).toLocaleDateString('id-ID')}
+                </p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="font-bold text-red-600">Rp ${formatRupiah(item.nominal)}</span>
+                <button onclick="hapusPengeluaran('${item.id}')" class="text-red-400 hover:text-red-600">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function tambahPengeluaran(event) {
+    event.preventDefault();
+    
+    const deskripsi = document.getElementById('deskripsiPengeluaran').value;
+    const nominal = parseFloat(document.getElementById('nominalPengeluaran').value);
+    const kategori = document.getElementById('kategoriPengeluaran').value;
+    
+    try {
+        const { error } = await supabaseClient
+            .from('pengeluaran')
+            .insert([{ deskripsi, nominal, kategori }]);
+        
+        if (error) throw error;
+        
+        alert('Pengeluaran berhasil ditambahkan!');
+        document.getElementById('formPengeluaran').reset();
+        loadPengeluaran();
+        hitungLabaRugi();
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Gagal menambahkan pengeluaran: ' + error.message);
+    }
+}
+
+async function hapusPengeluaran(id) {
+    if (!confirm('Yakin ingin menghapus pengeluaran ini?')) return;
+    
+    try {
+        const { error } = await supabaseClient
+            .from('pengeluaran')
+            .delete()
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        loadPengeluaran();
+        hitungLabaRugi();
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Gagal menghapus pengeluaran: ' + error.message);
+    }
+}
+
+// ============ LABA RUGI ============
+
+async function hitungLabaRugi() {
+    try {
+        // Ambil data transaksi
+        const { data: transaksi, error: tError } = await supabaseClient
+            .from('transaksi')
+            .select('*');
+        
+        if (tError) throw tError;
+        
+        // Ambil detail transaksi untuk modal
+        const { data: details, error: dError } = await supabaseClient
+            .from('detail_transaksi')
+            .select('*');
+        
+        if (dError) throw dError;
+        
+        // Ambil pengeluaran
+        const { data: pengeluaran, error: pError } = await supabaseClient
+            .from('pengeluaran')
+            .select('*');
+        
+        if (pError) throw pError;
+        
+        // Hitung total omzet
+        const totalOmzet = transaksi.reduce((sum, t) => sum + t.total, 0);
+        
+        // Hitung total modal (dari detail transaksi * harga modal)
+        let totalModal = 0;
+        for (const detail of details) {
+            // Ambil produk untuk mendapatkan harga modal
+            const { data: produk } = await supabaseClient
+                .from('produk')
+                .select('harga_modal')
+                .eq('id', detail.produk_id)
+                .single();
+            
+            if (produk) {
+                totalModal += produk.harga_modal * detail.jumlah;
+            }
+        }
+        
+        const totalPengeluaran = pengeluaran.reduce((sum, p) => sum + p.nominal, 0);
+        const labaBersih = totalOmzet - totalModal - totalPengeluaran;
+        
+        // Update UI
+        document.getElementById('totalOmzet').textContent = `Rp ${formatRupiah(totalOmzet)}`;
+        document.getElementById('totalModal').textContent = `Rp ${formatRupiah(totalModal)}`;
+        document.getElementById('totalPengeluaran').textContent = `Rp ${formatRupiah(totalPengeluaran)}`;
+        document.getElementById('labaBersih').textContent = `Rp ${formatRupiah(labaBersih)}`;
+        
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// Event listener untuk pengeluaran
+document.addEventListener('DOMContentLoaded', function() {
+    const formPengeluaran = document.getElementById('formPengeluaran');
+    if (formPengeluaran) {
+        formPengeluaran.addEventListener('submit', tambahPengeluaran);
+        loadPengeluaran();
+        hitungLabaRugi();
+    }
+});

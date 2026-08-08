@@ -1,0 +1,19 @@
+<!-- Tambahkan di bagian form produk -->
+<div class="mb-4">
+    <label class="form-label">Gambar Produk</label>
+    <div class="flex items-center space-x-4">
+        <button type="button" onclick="document.getElementById('fileInput').click()"
+            class="bg-violet-100 text-violet-700 px-4 py-2 rounded-lg hover:bg-violet-200 transition">
+            <i class="fas fa-upload mr-2"></i>Pilih Gambar
+        </button>
+        <button type="button" onclick="ambilFoto()"
+            class="bg-green-100 text-green-700 px-4 py-2 rounded-lg hover:bg-green-200 transition">
+            <i class="fas fa-camera mr-2"></i>Ambil Foto
+        </button>
+        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+        <span id="namaFile" class="text-sm text-gray-500">Belum ada gambar</span>
+    </div>
+    <div id="previewGambar" class="mt-2 hidden">
+        <img id="gambarPreview" src="" alt="Preview" class="w-32 h-32 object-cover rounded-lg border">
+    </div>
+</div>

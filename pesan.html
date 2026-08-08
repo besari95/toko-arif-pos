@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesan - Toko Arif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-violet-700 to-purple-700 text-white p-4">
+        <div class="container mx-auto">
+            <h1 class="text-2xl font-bold"><i class="fas fa-store mr-2"></i>Toko Arif</h1>
+            <p class="text-white/80 text-sm">ATK & Fotokopi • Self-Order</p>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Produk -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-box text-violet-600 mr-2"></i>Pilih Produk
+                    </h2>
+                    <div id="produkList" class="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto">
+                        <!-- Produk akan di-load -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keranjang -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6 sticky top-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-shopping-cart text-violet-600 mr-2"></i>Keranjang
+                    </h2>
+                    <div id="cartItems" class="space-y-2 max-h-[300px] overflow-y-auto mb-4">
+                        <!-- Item keranjang -->
+                    </div>
+                    <div class="border-t pt-4">
+                        <div class="flex justify-between text-lg font-bold mb-2">
+                            <span>Total:</span>
+                            <span id="totalHarga" class="text-violet-600">Rp 0</span>
+                        </div>
+                        <button onclick="checkout()"
+                            class="w-full bg-gradient-to-r from-violet-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-check mr-2"></i>Checkout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Toko -->
+        <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+            <h3 class="font-bold text-gray-800 mb-4">
+                <i class="fas fa-info-circle text-violet-600 mr-2"></i>Informasi Toko
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div id="infoToko">
+                    <!-- Data toko akan di-load -->
+                </div>
+                <div class="text-center">
+                    <p class="font-semibold">QRIS</p>
+                    <img src="qris.png" alt="QRIS" class="w-40 h-40 mx-auto object-contain border rounded-lg">
+                </div>
+                <div class="text-center">
+                    <p class="font-semibold">Transfer BRI</p>
+                    <p class="text-gray-600">582401006690509</p>
+                    <p class="text-gray-600">a.n. Amat Besari</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Checkout -->
+    <div id="checkoutModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-6">
+            <h3 class="text-xl font-bold mb-4">Detail Pesanan</h3>
+            <div id="checkoutDetail" class="space-y-2 mb-4"></div>
+            <div class="border-t pt-4">
+                <div class="flex justify-between font-bold">
+                    <span>Total:</span>
+                    <span id="checkoutTotal" class="text-violet-600">Rp 0</span>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Metode Pembayaran</label>
+                    <select id="metodeBayar" class="w-full form-input">
+                        <option value="QRIS">QRIS</option>
+                        <option value="Transfer BRI">Transfer BRI</option>
+                        <option value="Tunai">Tunai</option>
+                    </select>
+                </div>
+                <div id="paymentInfo" class="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <!-- Info pembayaran -->
+                </div>
+                <button onclick="konfirmasiPesanan()"
+                    class="w-full mt-4 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
+                    <i class="fas fa-check mr-2"></i>Konfirmasi Pesanan
+                </button>
+                <button onclick="closeCheckout()"
+                    class="w-full mt-2 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="supabase.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
